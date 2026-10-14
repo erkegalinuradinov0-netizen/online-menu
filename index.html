@@ -12,7 +12,7 @@
             --accent-color: #ff7f00;
             --secondary-text: #b0b0b0;
         }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 15px; background-color: var(--bg-color); color: var(--text-color); }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 15px; padding-bottom: 90px; background-color: var(--bg-color); color: var(--text-color); }
         h1 { text-align: center; color: var(--accent-color); font-size: 28px; margin-bottom: 5px; font-weight: 800; letter-spacing: 1px; }
         .sub-info { text-align: center; color: var(--secondary-text); font-size: 13px; margin-bottom: 25px; }
         
@@ -23,9 +23,37 @@
         .card img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; background: #333; }
         .card h3 { font-size: 15px; margin: 8px 0 4px; font-weight: 600; color: #fff; }
         .card p { font-size: 15px; font-weight: bold; color: var(--accent-color); margin-bottom: 10px; }
-        .card button { background: var(--accent-color); color: white; border: none; padding: 8px; border-radius: 8px; font-size: 12px; font-weight: bold; width: 100%; cursor: pointer; }
+        .card button { background: var(--accent-color); color: white; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: bold; width: 100%; cursor: pointer; }
         .card button:active { opacity: 0.8; }
 
+        /* ТӨМЕНДЕ ЖАБЫСЫП ТҰРАТЫН КОРЗИНА БАТЫРМАСЫ */
+        .sticky-cart-bar {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 30px);
+            max-width: 600px;
+            background: #28a745;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 999;
+            box-sizing: border-box;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        .sticky-cart-bar.hidden {
+            display: none;
+        }
+
+        /* КОРЗИНА ВЫПЛАВАЮЩИЙ БЛОК */
         .cart-box { background: var(--card-bg); padding: 20px; border-radius: 16px; margin-top: 35px; max-width: 700px; margin-left: auto; margin-right: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.5); border: 1px solid #333; }
         .cart-box h2 { font-size: 18px; margin-top: 0; border-bottom: 2px solid #333; padding-bottom: 10px; color: #fff; }
         
@@ -33,7 +61,7 @@
         .btn-remove { background: #ff4757; color: white; border: none; border-radius: 6px; padding: 4px 8px; font-size: 11px; cursor: pointer; margin-left: 10px; }
         
         .cart-total { font-size: 17px; font-weight: bold; display: flex; justify-content: space-between; margin-top: 15px; color: #fff; }
-        .btn-whatsapp { display: block; width: 100%; background: #2ed573; color: white; text-align: center; padding: 14px; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; margin-top: 15px; box-sizing: border-box; text-decoration: none; box-shadow: 0 4px 10px rgba(46, 213, 115, 0.3); }
+        .btn-whatsapp { display: block; width: 100%; background: #25D366; color: white; text-align: center; padding: 14px; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; margin-top: 15px; box-sizing: border-box; text-decoration: none; }
     </style>
 </head>
 <body>
@@ -286,8 +314,8 @@
 
     </div>
 
-    <!-- КОРЗИНА -->
-    <div class="cart-box">
+    <!-- КОРЗИНА БОЛІМІ -->
+    <div class="cart-box" id="cart-section">
         <h2>🛒 Тапсырысыңыз</h2>
         <div id="cart-list">Себет әлі бос</div>
         
@@ -299,12 +327,18 @@
         <button class="btn-whatsapp" onclick="sendToWhatsApp()">WhatsApp арқылы тапсырыс беру</button>
     </div>
 
+    <!-- ТӨМЕНГІ ЖАБЫСЫП ТҰРАТЫН КОРЗИНА БАТЫРМАСЫ -->
+    <div id="sticky-cart" class="sticky-cart-bar hidden" onclick="scrollToCart()">
+        <span>🛒 <span id="sticky-count">0</span> тауар</span>
+        <span>Тапсырысты қарау ➔</span>
+        <span><span id="sticky-price">0</span> тг</span>
+    </div>
+
     <script>
         let cart = [];
         let total = 0;
         
-        // ⚠️ Өз WhatsApp нөміріңізді жазыңыз (мысалы: 77003144700)
-        const WHATSAPP_NUMBER = "77059175884"; 
+        const WHATSAPP_NUMBER = "77003144700"; 
 
         function addToCart(name, price) {
             cart.push({ name, price });
@@ -318,15 +352,28 @@
             updateCartUI();
         }
 
+        function scrollToCart() {
+            document.getElementById('cart-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
         function updateCartUI() {
             const cartList = document.getElementById('cart-list');
             const totalPrice = document.getElementById('total-price');
+            const stickyCart = document.getElementById('sticky-cart');
+            const stickyCount = document.getElementById('sticky-count');
+            const stickyPrice = document.getElementById('sticky-price');
 
             if (cart.length === 0) {
                 cartList.innerHTML = "Себет әлі бос";
                 totalPrice.innerText = 0;
+                stickyCart.classList.add('hidden');
                 return;
             }
+
+            // Корзинада зат болса, төменгі плашканы көрсетеді
+            stickyCart.classList.remove('hidden');
+            stickyCount.innerText = cart.length;
+            stickyPrice.innerText = total;
 
             cartList.innerHTML = "";
             cart.forEach((item, index) => {
