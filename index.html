@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Онлайн Меню</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 15px; background-color: #f8f9fa; }
+        h1 { text-align: center; color: #212529; font-size: 24px; margin-bottom: 20px; }
+        
+        .menu-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+        .card { background: white; padding: 12px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .card img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; }
+        .card h3 { font-size: 16px; margin: 10px 0 5px; }
+        .card p { font-size: 14px; font-weight: bold; color: #e63946; margin-bottom: 10px; }
+        .card button { background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; width: 100%; }
+
+        .cart-box { background: white; padding: 15px; border-radius: 12px; margin-top: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .cart-box h2 { font-size: 18px; margin-top: 0; }
+        .cart-item { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; }
+        
+        .btn-whatsapp { display: block; width: 100%; background: #25D366; color: white; text-align: center; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; margin-top: 15px; box-sizing: border-box; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <h1>🍕 Онлайн Тапсырыс</h1>
+
+    <div class="menu-container">
+        <!-- Тағам 1 -->
+        <div class="card">
+            <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400" alt="Пицца">
+            <h3>Пицца Маргарита</h3>
+            <p>2 500 тг</p>
+            <button onclick="addToCart('Пицца Маргарита', 2500)">+ Себетке</button>
+        </div>
+
+        <!-- Тағам 2 -->
+        <div class="card">
+            <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400" alt="Бургер">
+            <h3>Бургер Классик</h3>
+            <p>1 800 тг</p>
+            <button onclick="addToCart('Бургер Классик', 1800)">+ Себетке</button>
+        </div>
+    </div>
+
+    <!-- Корзина -->
+    <div class="cart-box">
+        <h2>🛒 Тапсырысыңыз:</h2>
+        <div id="cart-list">Себет бош</div>
+        <hr style="border: 0.5px solid #eee; margin: 10px 0;">
+        <h3 style="font-size: 16px; display: flex; justify-content: space-between;">
+            <span>Жалпы:</span> 
+            <span><span id="total-price">0</span> тг</span>
+        </h3>
+        <button class="btn-whatsapp" onclick="sendToWhatsApp()">WhatsApp-пен тапсырыс беру</button>
+    </div>
+
+    <script>
+        let cart = [];
+        let total = 0;
+        
+        // ⚠️ Осы жердегі санның орнына ӨЗІҢІЗДІҢ WhatsApp нөміріңізді жазыңыз (мысалы: 77011234567)
+        const WHATSAPP_NUMBER = "77059175884"; 
+
+        function addToCart(name, price) {
+            cart.push({ name, price });
+            total += price;
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const cartList = document.getElementById('cart-list');
+            const totalPrice = document.getElementById('total-price');
+
+            if (cart.length === 0) {
+                cartList.innerHTML = "Себет бош";
+                totalPrice.innerText = 0;
+                return;
+            }
+
+            cartList.innerHTML = "";
+            cart.forEach((item) => {
+                cartList.innerHTML += `
+                    <div class="cart-item">
+                        <span>• ${item.name}</span>
+                        <span>${item.price} тг</span>
+                    </div>
+                `;
+            });
+
+            totalPrice.innerText = total;
+        }
+
+        function sendToWhatsApp() {
+            if (cart.length === 0) {
+                alert("Алдымен себетке тағам қосыңыз!");
+                return;
+            }
+
+            let message = "Сәлеметсіз бе! Мен тапсырыс бергім келеді:\n\n";
+            cart.forEach((item, i) => {
+                message += `${i + 1}. ${item.name} - ${item.price} тг\n`;
+            });
+
+            message += `\n*Жалпы сомасы: ${total} тг*`;
+
+            let url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+            window.location.href = url;
+        }
+    </script>
+</body>
+</html>
